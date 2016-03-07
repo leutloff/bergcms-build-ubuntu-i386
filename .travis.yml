@@ -8,8 +8,14 @@ env:
 
 language: bash
 
+sudo: required
+
 services: docker
 
+install:
+    # wput is used to copy the package to an FTP site.
+    - sudo apt-get install wput -y
+    
 script:
     - mkdir -p bergcms-build
     - docker build --tag=bergcms-build-ubuntu-i686 .
