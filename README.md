@@ -1,7 +1,9 @@
 # bergcms-build-ubuntu-i686
+[![Build Status](https://travis-ci.org/leutloff/bergcms-build-ubuntu-i686.png)](https://travis-ci.org/leutloff/bergcms-build-ubuntu-i686)
+
 Build the Berg CMS for a Ubuntu based 32-bit System.
 
-To install Docker, see (Install Docker Engine)[https://docs.docker.com/engine/installation]
+To install Docker, see [Install Docker Engine](https://docs.docker.com/engine/installation)
 
 To start the build run the following docker command:
 
