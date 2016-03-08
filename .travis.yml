@@ -18,14 +18,15 @@ script:
 - docker rm co-bergcms-build-ubuntu-i686
 after_success:
 - pushd bergcms-build
-- ls -l Berg*.zip
-- wput Berg*.zip ftp://$FTP_USER:$FTP_PASSWORD@$FTP_HOST/upload/ --reupload --less-verbose --tries=2 || true
+- echo $ARCHIVE
+- ls -l Berg*.zip $ARCHIVE
+- wput $ARCHIVE ftp://$FTP_USER:$FTP_PASSWORD@$FTP_HOST/upload/ --reupload --less-verbose --tries=2 || true
 - popd
 deploy:
   provider: releases
   api_key:
     secure: E1F1NcC3qcEphBYMvljXolsMlwxKDYQqlRvApvMW0M95WaOk/zMbDh3RVTVRwozsKBWuCKQ9BRfmnowy8VB9SQ1ThZN2qnNDzjLJNH7sZqiDLD00Isa1Oea14+/opp/si6JuAjjZIj0f1yi7VUf6REv9bqjgslms7o1e6eQAsq5al8+sat1U4x4mAcFv8LSmcKcaPhYUM9IjjRg9a5sT58QAn1+amjInA0gdElxdWFgtgqOI3u1TR3zmXIcFnMLLAIReFvz4pDNPLO9s2E6UKUl9Xd+7XnFzeycnbdPeNe06HeGVFBZ4yqO82kYxPGESDqF39KPhmb1tz1Uy61Jou+L9eVi/U1PGQ+0dwqkHRqfcPLj6Rrw4BdUXCrUZ5DlTukmbr5jHsFdDTXGlqh+8nU37fPFKHgq7bENQ1leR8YCBXsce/y7qqVPW4htkoPHDOtl+41x2U6geuXCakZ3g23xXvIuSP1bbQCMvl6fzeD+nG+ZZN5FOLQYdo7h6cJuzTkhpBuVTgzdQZ5aIthYbDGJCsUqTIbNgDVlKeaK2JEcTz0aiA+1vv8Esg9pyXHmdTnGZwq7hceS8JhZ0p3edViOsbVgjhsjUZADV+Ch61YuW5Thj5rF2JrRdwVGi8UQuWXMu80+s/L99MiL12HyBc/+HEx+L2LaMMb3Dm4LP15s=
-  file: Berg*.zip
+  file: $ARCHIVE
   skip_cleanup: true
   on:
     tags: true
