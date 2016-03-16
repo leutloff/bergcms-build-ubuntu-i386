@@ -3,8 +3,9 @@ FROM i386/ubuntu:trusty
 MAINTAINER Christian Leutloff <leutloff@sundancer.oche.de>
 
 # Install the build environment
-# Trusty: libboost-dev 1.54.01, gcc 4.8.2, cmake 2.8.12.2
+# Trusty: libboost-dev 1.54.01, gcc 4.8.2, (cmake 2.8.12.2)
 # Python is required by ctemplate, only
+# Curl with ca-certificates is used to download CMake 3.5
 RUN apt-get update && apt-get install --no-install-recommends -y \
     gcc \
     g++ \
@@ -15,7 +16,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     automake \
     make \
     patch \
-    cmake \
+    curl \
+    ca-certificates \
     file \
     less \
     git \
@@ -30,13 +32,26 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
        libboost-thread-dev libboost-test-dev \
  && rm -rf /var/lib/apt/lists/*
 
+
+# Install CMake 3.5, export OPTDIR=/opt, export CMAKEDIR=/opt/cmake-3.5, get shellscript installer, excute the downloaded file, add link from /usr/local/bin
+ENV OPTDIR /opt
+ENV CMAKEDIR /opt/cmake-3.5
+RUN mkdir -p "$OPTDIR" "$CMAKEDIR" && (cd "$OPTDIR" && \
+    curl -LO https://cmake.org/files/v3.5/cmake-3.5.0-Linux-i386.sh && \
+    /bin/sh ./cmake-*-Linux-i386.sh --prefix=$CMAKEDIR --skip-license && \
+    ln -sf $CMAKEDIR/bin/cmake /usr/local/bin/cmake && \
+    ln -sf $CMAKEDIR/bin/cpack /usr/local/bin/cpack && \
+    ln -sf $CMAKEDIR/bin/ctest /usr/local/bin/ctest && \
+    cd -)
+RUN cmake --version
+
 ENV BASEDIR /usr/src
 ENV BGDIR /usr/src/berg
 ENV BUILDDIR /usr/src/bergcms-build  
 ENV EXPORTDIR /opt/bergcms 
     
 # Get the Source
-RUN mkdir -p "$BASEDIR" && cd "$BASEDIR" && git clone git://github.com/leutloff/berg.git && cd berg && git checkout 6387b2b && git submodule update --init --recursive
+RUN mkdir -p "$BASEDIR" && cd "$BASEDIR" && git clone git://github.com/leutloff/berg.git && cd berg && git checkout 24c0e71 && git submodule update --init --recursive
 
 # Build ctemplate
 RUN cd "$BGDIR/src/external/ctemplate" \
