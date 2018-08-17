@@ -1,0 +1,74 @@
+# Ubuntu 18.04 LTS 32 Bit
+# Bionic: libboost-dev 1.65.1, gcc libboost-dev, cmake 3.10.2
+FROM i386/ubuntu:bionic
+ARG CMAKE_ARCH=i386
+
+MAINTAINER Christian Leutloff <leutloff@sundancer.oche.de>
+
+# Ensure a working DNS when nameserver is a localhost:
+#RUN echo "nameserver 208.67.222.222" >> /etc/resolv.conf && cat /etc/resolv.conf
+
+# Install the build environment
+# Curl with ca-certificates is used to download CMake 3.5
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    gcc \
+    g++ \
+    perl \
+    libtool \
+    autoconf \
+    automake \
+    make \
+    cmake \
+    texlive texlive-binaries texlive-latex-extra texlive-lang-german \
+    patch \
+    curl \
+    ca-certificates \
+    file \
+    less \
+    git \
+    bzip2 \
+    xz-utils \
+    libc6-dev \
+    zlib1g-dev \
+    libbz2-dev \
+    liblzma-dev \
+    libssl-dev \
+    libicu-dev \
+    libboost-dev libboost-chrono-dev libboost-date-time-dev libboost-filesystem-dev libboost-iostreams-dev \
+    libboost-locale-dev libboost-log-dev libboost-program-options-dev libboost-regex-dev \
+    libboost-signals-dev libboost-system-dev libboost-test-dev libboost-thread-dev \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN cmake --version && dpkg --print-architecture
+RUN find /usr/lib -name 'libicu*.so.*' -print
+RUN find /usr/lib -name 'libboost*.so.*' -print
+
+ENV BASEDIR /usr/src
+ENV BGDIR /usr/src/bergcms
+ENV BUILDDIR /usr/src/bergcms-build  
+ENV EXPORTDIR /opt/bergcms 
+    
+# Get the Source
+RUN mkdir -p "$BASEDIR" && cd "$BASEDIR" \
+    && git clone git://github.com/leutloff/bergcms.git bergcms \
+    && cd bergcms \
+    && git checkout -B master 93922cd59471b089b822a958a192a7dda3397fe8 \
+    && git submodule update --init --recursive
+
+RUN cd "$BGDIR" && ./build_documentation.sh
+
+# Build the Berg CMS
+RUN mkdir -p "$BUILDDIR" && cd "$BUILDDIR" \
+    && cmake -D CMAKE_BUILD_TYPE=Distribution -D CMAKE_VERBOSE_MAKEFILE=FALSE -D Boost_DEBUG=FALSE "$BGDIR/src" \
+    && make \
+    && make package \
+    && export BERG_ARCHIVE=$(ls -t Berg*.zip | head -1) \
+    && ls -al . "$BUILDDIR"  test "$BUILDDIR/test" 
+
+# Running the C++ unit tests...
+RUN cd "$BUILDDIR/test" \
+    && ./bergunittests \
+    && echo "BUILDDIR: $BUILDDIR" \
+    && ls -al "$BUILDDIR"
+
+ENTRYPOINT [ "/bin/bash", "-c", "/bin/ls /usr/src/bergcms-build/*.zip" ]

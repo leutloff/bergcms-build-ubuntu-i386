@@ -10,7 +10,7 @@ install:
 - sudo apt-get install wput -y
 script:
 - mkdir -p bergcms-build
-- docker build --tag=bergcms-build-ubuntu-i686 --file=./Dockerfile-xenial .
+- docker build --tag=bergcms-build-ubuntu-i686 --file=./Dockerfile-bionic .
 - docker images
 - ARCHIVE=$(docker run --name=co-bergcms-build-ubuntu-i686  bergcms-build-ubuntu-i686)
 - docker cp co-bergcms-build-ubuntu-i686:$ARCHIVE bergcms-build
